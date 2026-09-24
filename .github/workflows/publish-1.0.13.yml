@@ -1,0 +1,26 @@
+name: Publish Junggi Manager 1.0.13
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/publish-1.0.13.yml]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download and verify installer
+        env:
+          ARTIFACT_URL: 'https://sdmntprsoutheastus3.oaiusercontent.com/files/00000000-def0-820c-9601-b4915a4e3961/raw?se=2026-09-24T08%3A58%3A01Z&sp=r&sv=2026-02-06&sr=b&scid=98e861f6-06aa-4cdf-9193-3032ffd5974d&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-24T06%3A07%3A04Z&ske=2026-09-25T06%3A07%3A04Z&sks=b&skv=2026-02-06&sig=iuMW7AvG/IUDG0Td6i6KNbKrmgUITSb24VoJL3iuPOo%3D'
+        run: |
+          curl --fail --location --retry 3 "$ARTIFACT_URL" --output installer.zip
+          unzip installer.zip -d release
+          cd release
+          sha256sum --check SHA256SUMS.txt
+          test "$(python3 -c 'import json; print(json.load(open("update.json"))["version"])')" = "1.0.13"
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: fqhdtn-lgtm/junggi-manager-releases
+        run: |
+          gh release create v1.0.13 release/JunggiManager-Setup-1.0.13.exe release/update.json release/SHA256SUMS.txt --title "중기메니저 1.0.13" --notes "계산서 화면, 거래명세서 집계와 목록 수정" --latest
