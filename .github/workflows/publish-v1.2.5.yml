@@ -1,0 +1,82 @@
+name: publish-v1.2.5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v1.2.5.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_URL: 'https://sdmntprjapaneast.oaiusercontent.com/files/00000000-8e08-8209-b6bb-e48ee256d7a7/raw?se=2026-10-04T07%3A32%3A14Z&sp=r&sv=2026-02-06&sr=b&scid=2b891a2c-e3e2-5c31-b1ff-ef39c54cc2b7&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-04T01%3A21%3A48Z&ske=2026-10-05T01%3A21%3A48Z&sks=b&skv=2026-02-06&sig=/u2JAoR0J0OBuduArJkYl5OldO2kXYoYgI8tgvy/DBM%3D'
+      EXPECTED_SHA256: 'c2bcb495dbdeec7123a35728ab61b22197d2b8ddc97c2f89d952e64ee5d7b363'
+      EXPECTED_SIZE: '20549761'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified build artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 "$ARTIFACT_URL" -o artifact.zip
+          mkdir payload
+          unzip -q artifact.zip -d payload
+          test -f payload/JunggiManager-Setup-1.2.5.exe
+          test -f payload/update.json
+          test -f payload/SHA256SUMS.txt
+      - name: Verify and finalize manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(sha256sum payload/JunggiManager-Setup-1.2.5.exe | awk '{print $1}')"
+          actual_size="$(stat -c%s payload/JunggiManager-Setup-1.2.5.exe)"
+          test "$actual_sha" = "$EXPECTED_SHA256"
+          test "$actual_size" = "$EXPECTED_SIZE"
+          printf '%s  %s\n' "$EXPECTED_SHA256" 'JunggiManager-Setup-1.2.5.exe' > payload/SHA256SUMS.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('payload/update.json')
+          d = json.loads(p.read_text(encoding='utf-8-sig'))
+          d.update({
+              'schema': 1,
+              'version': '1.2.5',
+              'url': 'https://github.com/fqhdtn-lgtm/junggi-manager-releases/releases/download/v1.2.5/JunggiManager-Setup-1.2.5.exe',
+              'sha256': 'c2bcb495dbdeec7123a35728ab61b22197d2b8ddc97c2f89d952e64ee5d7b363',
+              'size': 20549761,
+              'notes': '중기메니저 1.2.5\n- 회원정보 연락처 및 수정 화면에 인증문자 발송 버튼 추가\n- 등록된 휴대번호 기반 회원앱 가입·재설정 문자 발송 연결\n- 미저장 휴대번호 발송 차단 및 기존 비회원 재노출 기능 유지\n- Flutter 분석·테스트 및 Windows 설치파일 검증 완료',
+          })
+          p.write_text(json.dumps(d, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+          PY
+      - name: Publish v1.2.5 release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v1.2.5 >/dev/null 2>&1; then
+            echo "v1.2.5 already exists" >&2
+            exit 1
+          fi
+          cat > release-notes.txt <<'EOF'
+          중기메니저 1.2.5
+          - 회원정보 연락처 옆 인증문자 발송 버튼 추가
+          - 회원정보 수정의 휴대번호 입력칸 옆 인증문자 발송 버튼 추가
+          - 미저장 휴대번호로는 문자 발송 차단
+          - 기존 회원앱 가입·재설정 문자 인증 API 연결
+          - 기존 비회원 전화번호 재노출 기능 유지
+          - Flutter analyze/test 및 Windows Release/Inno Setup 검증 완료
+          - 소스 main: fec5546a32265df9466744c6b8af4140908f50d7
+          EOF
+          gh release create v1.2.5 \
+            payload/JunggiManager-Setup-1.2.5.exe \
+            payload/update.json \
+            payload/SHA256SUMS.txt \
+            --title '중기메니저 1.2.5' \
+            --notes-file release-notes.txt \
+            --target main \
+            --latest
