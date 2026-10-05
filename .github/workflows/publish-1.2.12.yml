@@ -1,10 +1,8 @@
 name: publish-1.2.12
 
 on:
-  push:
+  pull_request:
     branches: [main]
-    paths:
-      - '.github/workflows/publish-1.2.12.yml'
   workflow_dispatch:
 
 permissions:
@@ -16,7 +14,7 @@ jobs:
     steps:
       - name: Download installer artifact
         env:
-          ARTIFACT_URL: 'https://sdmntprjapaneast.oaiusercontent.com/files/00000000-a3bc-8209-bcab-0b6b80ed890a/raw?se=2026-10-05T05%3A57%3A41Z&sp=r&sv=2026-02-06&sr=b&scid=eba9f817-d859-52cf-a333-e5f0398aaf51&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-05T02%3A27%3A38Z&ske=2026-10-06T02%3A27%3A38Z&sks=b&skv=2026-02-06&sig=d93RaK1Az4t4sg5NRN/ufxypG9g8OGIVHzjQYwEm/KQ%3D'
+          ARTIFACT_URL: 'https://sdmntprjapaneast.oaiusercontent.com/files/00000000-6834-8209-8081-41d4297b48cb/raw?se=2026-10-05T05%3A58%3A41Z&sp=r&sv=2026-02-06&sr=b&scid=76f644c9-de22-57c2-b70e-41af9044cd45&skoid=bb372dd6-3b2a-4af2-b355-c26497ba23cd&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-05T00%3A56%3A54Z&ske=2026-10-06T00%3A56%3A54Z&sks=b&skv=2026-02-06&sig=myykuH/JO4FCT08SJG2gL45CcoHv4HyVYxtkBkKXlPk%3D'
         shell: bash
         run: |
           set -euo pipefail
