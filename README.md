@@ -4,10 +4,10 @@
 
 ## 현재 최신 버전
 
-**v1.2.14**
+**v1.3.14**
 
 - 최신 Release: https://github.com/fqhdtn-lgtm/junggi-manager-releases/releases/latest
-- 설치파일: `JunggiManager-Setup-1.2.14.exe`
+- 설치파일: `JunggiManager-Setup-1.3.14.exe`
 - 자동 업데이트 정보: `update.json`
 - 이전 버전 Release는 롤백/기록용이며 새 설치에는 사용하지 않습니다.
 
@@ -15,7 +15,7 @@
 
 개발 소스는 `fqhdtn-lgtm/junggi_manager`에서 관리합니다.
 
-현재 v1.2.14 기준 소스는 **PR #47 `[CURRENT] 중기메니저 v1.2.14 기준 소스`**로 표시해 두었습니다.
+현재 v1.3.14 기준 소스는 **PR #74 `매니저 업무흐름 오류 6건 수정 및 회귀 테스트 추가`**에 보존되어 있습니다.
 이전 버전용 임시 배포 워크플로는 모두 제거했습니다.
 
 ## 배포 원칙
